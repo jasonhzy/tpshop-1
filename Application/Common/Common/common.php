@@ -166,6 +166,27 @@ function refresh_stock($goods_id){
     M("Goods")->where("goods_id = $goods_id")->save(array('store_count'=>$store_count)); // 更新商品的总库存
 }
 
+/*
+ * 判断是否为一元购订单
+ */
+function is_oneyuan($order_id){
+    $orderGoodsArr = M('OrderGoods')->where("order_id = $order_id")->select();
+
+    foreach($orderGoodsArr as $key => $val)
+    {
+
+        if($orderGoodsArr[]['prom_type']!=11){
+            return 0;
+        }
+
+        return 1;
+    }
+
+
+}
+
+
+
 /**
  * 根据 order_goods 表扣除商品库存
  * @param type $order_id  订单id
@@ -191,6 +212,14 @@ function minus_stock($order_id){
         		M($tb)->where("id=".$val['prom_id'])->setInc('buy_num',$val['goods_num']);
         		M($tb)->where("id=".$val['prom_id'])->setInc('order_num');
         	}
+        }
+        if($val['prom_type']==11){
+            $prom = get_goods_promotion($val['goods_id']);
+            if($prom['is_end']==0){
+                $tb = $val['prom_type']==11 ? 'oneyuan_sale' : 'oneyuan_sale';
+                M($tb)->where("id=".$val['prom_id'])->setInc('buy_num',$val['goods_num']);
+                M($tb)->where("id=".$val['prom_id'])->setInc('order_num');
+            }
         }
     }
 }
@@ -780,8 +809,9 @@ function update_pay_status($order_sn,$pay_status = 1)
 		if($count == 0) return false;
 		// 找出对应的订单
 		$order = M('order')->where("order_sn = '$order_sn'")->find();
+        $is_oneyuan=is_oneyuan($order['order_id']);
 		// 修改支付状态  已支付
-		M('order')->where("order_sn = '$order_sn'")->save(array('pay_status'=>1,'pay_time'=>time()));
+		M('order')->where("order_sn = '$order_sn'")->save(array('pay_status'=>1,'pay_time'=>time(),'is_oneyuan'=>$is_oneyuan));
 		// 减少对应商品的库存
 		minus_stock($order['order_id']);
 		// 给他升级, 根据order表查看消费记录 给他会员等级升级 修改他的折扣 和 总金额

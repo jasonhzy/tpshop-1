@@ -267,10 +267,10 @@
                 </if>
                 </table>
         </div>
-        <if> condition="$goods['prom_type'] eq 11">
+        <if condition="$goods['prom_type'] eq 11">
             <div class="join-a-shopping-cart fl" id="join_cart_now"><!-- location.href='{:U('Home/Cart/cart')}-->
                 <a class="jrgwc-shopping-img jrgwc-shopping-img2" onClick="javascript:AjaxAddCart({$goods.goods_id},1,1);">
-                    <span>oneyuan购买</span>
+                    <span>一元购</span>
                 </a>
             </div>
 
