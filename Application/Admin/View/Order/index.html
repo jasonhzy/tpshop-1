@@ -63,6 +63,13 @@
                                             <option value="{$k-1}">{$v}</option>
                                         </volist>
                                     </select>
+                                    <div class="form-group">
+                                        <select name="is_oneyuan" class="input-sm" style="width:100px;">
+                                            <option value="">是否为一元购</option>
+                                            <option value="0">不是一元购</option>
+                                            <option value="1">是一元购</option>
+                                        </select>
+                                    </div>
                                     <input type="hidden" name="order_by" value="order_id">
                                     <input type="hidden" name="sort" value="desc">
                                     <input type="hidden" name="user_id" value="{$_GET[user_id]}">

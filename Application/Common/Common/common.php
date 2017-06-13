@@ -174,15 +174,11 @@ function is_oneyuan($order_id){
 
     foreach($orderGoodsArr as $key => $val)
     {
-
-        if($orderGoodsArr[]['prom_type']!=11){
+        if($val['prom_type']!=11){
             return 0;
         }
-
         return 1;
     }
-
-
 }
 
 
@@ -193,6 +189,7 @@ function is_oneyuan($order_id){
  */
 function minus_stock($order_id){
     $orderGoodsArr = M('OrderGoods')->where("order_id = $order_id")->select();
+   // $str=M()->getLastSql();//SELECT * FROM `tp_order_goods` WHERE ( order_id = 814 )
     foreach($orderGoodsArr as $key => $val)
     {
         // 有选择规格的商品
@@ -219,6 +216,38 @@ function minus_stock($order_id){
                 $tb = $val['prom_type']==11 ? 'oneyuan_sale' : 'oneyuan_sale';
                 M($tb)->where("id=".$val['prom_id'])->setInc('buy_num',$val['goods_num']);
                 M($tb)->where("id=".$val['prom_id'])->setInc('order_num');
+                M($tb)->where("id=".$val['prom_id'])->setInc('oneyuan_buy_num',$val['goods_num']);
+
+                $getInfo= M($tb)->where("id=".$val['prom_id'])->select();
+                foreach($getInfo as $key => $val)
+                {
+                    if(is_int($val['oneyuan_buy_num']/ceil($val['ori_price']))){
+
+
+                        $oneyuan_orders = M('OrderGoods')->where('prom_id ='.$val['prom_id'].' and prom_type = 11')->find();
+                        foreach ($oneyuan_orders as $oneyuan_order  ) {
+                            $orderLogic = new Admin\Logic\OrderLogic();
+//                            $oneyuan_order = $orderLogic->getOrderInfo($oneyuan_order['order_id']);
+                            $orderGoods = $orderLogic->getOrderGoods($oneyuan_order['order_id']);
+                            foreach ($orderGoods as $orderGood){
+                                if($orderGood['prom_type']==11){
+                                    for ($i=0;$i<$orderGood['goods_num'];$i++){
+                                        $oneyuan_thisgood_bug_order[]=$orderGood['order_id'];
+                                    }
+                                }
+                            }
+
+                        }
+                        //开奖
+//                     // M('')
+//                        $res_arr = M('order')->where('is_oneyuan = 1')->order('order by rand()')->find();
+//                        M('order')->where('is_oneyuan = 1')->setInc('period ');
+//                        M('order')->where('is_oneyuan = 1')->setField('get_oneyuan',1);
+                        return 0;
+                    }
+
+                }
+
             }
         }
     }

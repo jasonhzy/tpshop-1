@@ -28,6 +28,7 @@ class OrderController extends BaseController {
         $this->order_status = C('ORDER_STATUS');
         $this->pay_status = C('PAY_STATUS');
         $this->shipping_status = C('SHIPPING_STATUS');
+
         // 订单 支付 发货状态
         $this->assign('order_status',$this->order_status);
         $this->assign('pay_status',$this->pay_status);
@@ -67,6 +68,7 @@ class OrderController extends BaseController {
         I('pay_code') != '' ? $condition['pay_code'] = I('pay_code') : false;
         I('shipping_status') != '' ? $condition['shipping_status'] = I('shipping_status') : false;
         I('user_id') ? $condition['user_id'] = trim(I('user_id')) : false;
+        I('is_oneyuan') ? $condition['is_oneyuan'] = trim(I('is_oneyuan')) : false;
         $sort_order = I('order_by','DESC').' '.I('sort');
         $count = M('order')->where($condition)->count();
         $Page  = new AjaxPage($count,20);
@@ -115,6 +117,10 @@ class OrderController extends BaseController {
         $orderLogic = new OrderLogic();
         $order = $orderLogic->getOrderInfo($order_id);
         $orderGoods = $orderLogic->getOrderGoods($order_id);
+        foreach ($orderGoods as $orderGood){
+            var_dump($orderGood);
+        }
+        echo $orderGoods;exit;
         $button = $orderLogic->getOrderButton($order);
         // 获取操作记录
         $action_log = M('order_action')->where(array('order_id'=>$order_id))->order('log_time desc')->select();

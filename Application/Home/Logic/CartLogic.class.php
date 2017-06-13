@@ -72,8 +72,24 @@ class CartLogic extends RelationModel
                 if(($flash_sale['goods_num'] - $flash_sale['buy_num']) < $flash_sale['buy_limit'])
                     return array('status'=>-4,'msg'=>"库存不够,你只能买".($flash_sale['goods_num'] - $flash_sale['buy_num'])."件了.",'result'=>'');                    
             }
-        }                
-        
+        }
+        if($goods['prom_type'] == 11)
+        {
+            $oneyuan_sale = M('oneyuan_sale')->where("id = {$goods['prom_id']} and ".time()." > start_time and ".time()." < end_time and goods_num > buy_num")->find(); // 限时抢购活动
+            if($oneyuan_sale){
+                $cart_goods_num = M('Cart')->where("($where) and goods_id = {$goods['goods_id']}")->getField('goods_num');
+                // 如果购买数量 大于每人限购数量
+                if(($goods_num + $cart_goods_num) > $flash_sale['buy_limit'])
+                {
+                    $cart_goods_num && $error_msg = "你当前购物车已有 $cart_goods_num 件!";
+                    return array('status'=>-4,'msg'=>"每人限购 {$flash_sale['buy_limit']}件 $error_msg",'result'=>'');
+                }
+                // 如果剩余数量 不足 限购数量, 就只能买剩余数量
+                if(($oneyuan_sale['goods_num'] - $oneyuan_sale['buy_num']) < $oneyuan_sale['buy_limit'])
+                    return array('status'=>-4,'msg'=>"库存不够,你只能买".($oneyuan_sale['goods_num'] - $oneyuan_sale['buy_num'])."件了.",'result'=>'');
+            }
+        }
+
         foreach($goods_spec as $key => $val) // 处理商品规格
             $spec_item[] = $val; // 所选择的规格项                            
         if(!empty($spec_item)) // 有选择商品规格
