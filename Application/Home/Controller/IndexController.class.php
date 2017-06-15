@@ -139,6 +139,14 @@ class IndexController extends BaseController {
         $this->assign('goodsList',$goodsList);
         $this->display();
     }
+    public function oneyuanGet(){
+        $Model = new \Think\Model();
+        $List = M('order')->where('get_oneyuan=1')->select();
+
+
+        dump($List);
+
+    }
     
     function truncate_tables (){
         $model = new \Think\Model(); // 实例化一个model对象 没有对应任何数据表

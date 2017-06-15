@@ -219,17 +219,23 @@ function minus_stock($order_id){
                 M($tb)->where("id=".$val['prom_id'])->setInc('oneyuan_buy_num',$val['goods_num']);
 
                 $getInfo= M($tb)->where("id=".$val['prom_id'])->select();
+                $prom_id=$val['prom_id'];
                 foreach($getInfo as $key => $val)
                 {
-                    if(is_int($val['oneyuan_buy_num']/ceil($val['ori_price']))){
+                    if($val['oneyuan_buy_num']>ceil($val['ori_price'])){
 
 
-                        $oneyuan_orders = M('OrderGoods')->where('prom_id ='.$val['prom_id'].' and prom_type = 11')->find();
+                        $oneyuan_orders = M('OrderGoods')->where('prom_id ='.$prom_id.' and prom_type = 11')->select();
+                        M('oneyuan_sale')->where('id ='.$prom_id)->setField('oneyuan_buy_num',0);
+                        $res=M()->getLastSql();
                         foreach ($oneyuan_orders as $oneyuan_order  ) {
                             $orderLogic = new Admin\Logic\OrderLogic();
-//                            $oneyuan_order = $orderLogic->getOrderInfo($oneyuan_order['order_id']);
-                            $orderGoods = $orderLogic->getOrderGoods($oneyuan_order['order_id']);
+//
+                            $orderGoods = $orderLogic->getOrderGoods_ispay($oneyuan_order['order_id']);
+                            M('order')->where('order_id='.$oneyuan_order['order_id'])->setField('used_oneyuan',1);
+                            $res=M()->getLastSql();
                             foreach ($orderGoods as $orderGood){
+
                                 if($orderGood['prom_type']==11){
                                     for ($i=0;$i<$orderGood['goods_num'];$i++){
                                         $oneyuan_thisgood_bug_order[]=$orderGood['order_id'];
@@ -239,10 +245,13 @@ function minus_stock($order_id){
 
                         }
                         //开奖
-//                     // M('')
-//                        $res_arr = M('order')->where('is_oneyuan = 1')->order('order by rand()')->find();
-//                        M('order')->where('is_oneyuan = 1')->setInc('period ');
-//                        M('order')->where('is_oneyuan = 1')->setField('get_oneyuan',1);
+                        $max_count=count($oneyuan_thisgood_bug_order);
+                        $get_oneyuan_order_num=mt_rand(0,$max_count);
+                        $get_oneyuan_order=$oneyuan_thisgood_bug_order[$get_oneyuan_order_num];
+
+                        $res_arr = M('order')->where('is_oneyuan = 1 and order_id ='.$get_oneyuan_order)->setField('get_oneyuan',1);
+
+
                         return 0;
                     }
 

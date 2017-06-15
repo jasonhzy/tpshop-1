@@ -37,7 +37,14 @@ class OrderLogic extends RelationModel
         $res = $this->query($sql);
         return $res;
     }
-
+    /*
+      * 获取订单商品详情
+      */
+    public function getOrderGoods_ispay($order_id){
+        $sql = "SELECT * FROM tp_order_goods LEFT JOIN tp_order on tp_order_goods.order_id=tp_order.order_id WHERE tp_order.pay_status=1  AND tp_order.used_oneyuan=0 AND tp_order_goods.order_id= $order_id";
+        $res = $this->query($sql);
+        return $res;
+    }
     /*
      * 获取订单信息
      */
